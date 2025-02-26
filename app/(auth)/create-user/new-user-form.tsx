@@ -203,7 +203,7 @@ export function NewUserForm({
           </Form>
         </CardContent>
         <CardFooter className="flex justify-center border-t p-4">
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <a href="/login" className="text-primary hover:underline">
               Sign in

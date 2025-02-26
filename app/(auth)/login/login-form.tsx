@@ -120,7 +120,7 @@ export function LoginForm({ className, returnTo, ...props }: LoginFormProps) {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="text-muted-foreground absolute right-0 top-0 h-10 w-10 hover:text-foreground"
+                          className="absolute right-0 top-0 h-10 w-10 text-muted-foreground hover:text-foreground"
                           onClick={togglePasswordVisibility}
                           tabIndex={-1}
                         >

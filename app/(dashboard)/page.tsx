@@ -1,3 +1,3 @@
-export default function TestPage() {
-  return <div>Page works!</div>;
+export default function Page() {
+  return <p>Hello</p>;
 }

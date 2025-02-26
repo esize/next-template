@@ -1,14 +1,9 @@
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
-
 export default function TestPage() {
   return (
-    <div>
-      <h1>Test Page</h1>
-      <Button asChild variant={"default"}>
-        <Link href="">Log Back In</Link>
-      </Button>
-    </div>
+    <>
+      <div className="bg-muted/50 aspect-video rounded-xl" />
+      <div className="bg-muted/50 aspect-video rounded-xl" />
+      <div className="bg-muted/50 aspect-video rounded-xl"></div>
+    </>
   );
 }
