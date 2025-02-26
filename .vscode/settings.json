@@ -25,6 +25,7 @@
 
   "typescript.tsdk": "node_modules/typescript/lib",
   "prettier.documentSelectors": ["**/*.{cjs,mjs,ts,tsx,md,json,yaml,yml}"],
+  "eslint.useFlatConfig": true,
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
