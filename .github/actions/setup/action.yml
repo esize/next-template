@@ -10,8 +10,5 @@ runs:
         node-version: 20
         cache: "pnpm"
     - name: Install Dependencies
-      run: npm install -g pnpm && pnpm install
-      shell: bash
-
-    - shell: bash
       run: pnpm install
+      shell: bash
