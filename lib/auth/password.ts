@@ -1,8 +1,8 @@
 // lib/auth/password.ts
-import bcrypt from "bcrypt";
+import argon2 from "argon2";
 
 /**
- * Hash a password using bcrypt
+ * Hash a password using argon2
  *
  * @param password - The plain text password to hash
  * @returns Promise resolving to the hashed password
@@ -11,13 +11,29 @@ import bcrypt from "bcrypt";
  * ```typescript
  * const plainPassword = "securePassword123";
  * const hashedPassword = await hashPassword(plainPassword);
- * // Returns: "$2b$10$X9xOe0Tn1Gk..."
+ * // Returns: "$argon2id$v=19$m=65536,t=3,p=4$..."
  * ```
  */
 export async function hashPassword(password: string): Promise<string> {
-  // Use a cost factor of 12 for a good balance between security and performance
-  const saltRounds = 12;
-  return bcrypt.hash(password, saltRounds);
+  try {
+    // Use argon2id variant which provides a balanced approach for protection
+    // against both side-channel attacks and GPU attacks
+    return await argon2.hash(password, {
+      // argon2id is the recommended variant for most use cases
+      type: argon2.argon2id,
+      // Memory cost: 64 MiB (default is 65536 KiB)
+      memoryCost: 65536,
+      // Time cost: 3 iterations (default)
+      timeCost: 3,
+      // Parallelism: 4 threads (default)
+      parallelism: 4,
+      // Output hash encoded as string
+      hashLength: 32,
+    });
+  } catch (error) {
+    console.error("Error hashing password with argon2:", error);
+    throw new Error("Password hashing failed");
+  }
 }
 
 /**
@@ -30,7 +46,7 @@ export async function hashPassword(password: string): Promise<string> {
  * @example
  * ```typescript
  * const plainPassword = "securePassword123";
- * const hashedPassword = "$2b$10$X9xOe0Tn1Gk...";
+ * const hashedPassword = "$argon2id$v=19$m=65536,t=3,p=4$...";
  * const isMatch = await verifyPassword(plainPassword, hashedPassword);
  * // Returns: true if password matches, false otherwise
  * ```
@@ -39,7 +55,14 @@ export async function verifyPassword(
   password: string,
   hashedPassword: string,
 ): Promise<boolean> {
-  return bcrypt.compare(password, hashedPassword);
+  try {
+    return await argon2.verify(hashedPassword, password);
+  } catch (error) {
+    console.error("Error verifying password with argon2:", error);
+    // Return false on error rather than throwing, as this is typically
+    // used in authentication flows where we want to fail closed
+    return false;
+  }
 }
 
 /**

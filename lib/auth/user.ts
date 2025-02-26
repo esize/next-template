@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema";
-import { Session } from "@/types/auth";
+import { Session, User } from "@/types/auth";
 
 import {
   generateRandomPassword,
@@ -13,16 +13,16 @@ import {
 import { createSession } from "./session";
 
 /**
- * Hash a password using bcrypt
+ * Log in a user
  *
- * @param password - The plain text password to hash
- * @returns Promise resolving to the hashed password
+ * @param email - The email submitted by the user
+ * @param password - The plain text password submitted by the user
+ * @returns Promise resolving to the session or null
  *
  * @example
  * ```typescript
- * const plainPassword = "securePassword123";
- * const hashedPassword = await hashPassword(plainPassword);
- * // Returns: "$2b$10$X9xOe0Tn1Gk..."
+ * const newSession = await logInUser(email, password);
+ * // Returns: {id, userId, expiresAt, metadata}
  * ```
  */
 export async function logInUser(
@@ -44,4 +44,38 @@ export async function logInUser(
     return session;
   }
   return null;
+}
+/**
+ * Create a user
+ *
+ * @param email - The email to be associated with the user
+ * @param password - The password to be created for the user
+ * @param firstName - The user's first name
+ * @param lastName - The user's last name
+ * @returns Promise resolving to the session or null
+ *
+ * @example
+ * ```typescript
+ * const createUser = await createUser(email, password, firstName, lastName, teamId);
+ * // Returns: "asdf092"
+ * ```
+ */
+export async function createUser(
+  email: string,
+  password: string,
+  firstName: string,
+  lastName: string,
+): Promise<User["id"]> {
+  const userId = await db
+    .insert(users)
+    .values({
+      email,
+      passwordHash: await hashPassword(password),
+      firstName,
+      lastName,
+      teamId: "root",
+      role: "admin",
+    })
+    .returning({ id: users.id });
+  return userId[0].id;
 }
