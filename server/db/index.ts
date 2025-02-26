@@ -10,4 +10,4 @@ const pool = new Pool({
 });
 const db = drizzle({ client: pool, schema: { schema } });
 
-export default db;
+export { db };
