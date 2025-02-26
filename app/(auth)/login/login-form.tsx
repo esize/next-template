@@ -1,10 +1,15 @@
 "use client";
 
+import type React from "react";
+import { useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import type { z } from "zod";
 import { useServerAction } from "zsa-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,6 +36,8 @@ export function LoginForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const { isPending, execute, data, error } = useServerAction(logIn);
+  const [showPassword, setShowPassword] = useState(false);
+
   const form = useForm<z.infer<typeof logInSchema>>({
     resolver: zodResolver(logInSchema),
     defaultValues: {
@@ -40,77 +47,119 @@ export function LoginForm({
   });
 
   async function onSubmit(values: z.infer<typeof logInSchema>) {
-    console.log("test");
-    const [data, err] = await execute(values);
+    const [, err] = await execute(values);
     if (err) {
       return;
     }
-    console.log(data);
     form.reset({});
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
+    <div
+      className={cn("mx-auto flex w-full max-w-md flex-col gap-6", className)}
+      {...props}
+    >
+      <Card className="border-opacity-50 shadow-md">
+        <CardHeader className="space-y-1 pb-4">
+          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Enter your email below to login to your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            id="email"
-                            type="email"
-                            placeholder="m@example.com"
-                            {...field}
-                            required
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            id="password"
-                            type="password"
-                            required
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isPending}>
-                  {isPending ? "Logging in..." : "Login"}
-                </Button>
-              </div>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="m@example.com"
+                        className="h-10"
+                        {...field}
+                        required
+                        autoComplete="email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Password
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          className="h-10 pr-10"
+                          {...field}
+                          required
+                          autoComplete="current-password"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground absolute right-0 top-0 h-10 w-10 hover:text-foreground"
+                          onClick={togglePasswordVisibility}
+                          tabIndex={-1}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">
+                            {showPassword ? "Hide password" : "Show password"}
+                          </span>
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                className="h-10 w-full transition-all"
+                disabled={isPending}
+              >
+                {isPending ? "Logging in..." : "Login"}
+              </Button>
             </form>
           </Form>
-          {data && <div>Message: {JSON.stringify(data)}</div>}
-          {error && <div>Error: {JSON.stringify(error.fieldErrors)}</div>}
+
+          {data && (
+            <Alert className="mt-4 border-green-200 bg-green-50 text-green-800">
+              <AlertDescription>Login successful</AlertDescription>
+            </Alert>
+          )}
+
+          {error && (
+            <Alert className="mt-4 border-red-200 bg-red-50 text-red-800">
+              <AlertDescription>
+                {error.message || "An error occurred during login"}
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </div>

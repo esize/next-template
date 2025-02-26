@@ -1,15 +1,21 @@
 "use client";
 
+import type React from "react";
+import { useState } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import type { z } from "zod";
 import { useServerAction } from "zsa-react";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -31,6 +37,9 @@ export function NewUserForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const { isPending, execute, data, error } = useServerAction(create);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
   const form = useForm<z.infer<typeof createUserSchema>>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
@@ -42,63 +51,38 @@ export function NewUserForm({
   });
 
   async function onSubmit(values: z.infer<typeof createUserSchema>) {
-    console.log("test");
-    const [data, err] = await execute(values);
+    const [, err] = await execute(values);
     if (err) {
       return;
     }
-    console.log(data);
+    setIsSuccess(true);
     form.reset({});
+
+    // Reset success message after 5 seconds
+    setTimeout(() => {
+      setIsSuccess(false);
+    }, 5000);
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+    <div className={cn("mx-auto max-w-md", className)} {...props}>
+      <Card className="shadow-lg">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your information to create a new account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="m@example.com"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid gap-2">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="space-y-4">
+                {/* Personal Information Section */}
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="firstName"
@@ -106,7 +90,7 @@ export function NewUserForm({
                       <FormItem>
                         <FormLabel>First Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Beyoncé" {...field} />
+                          <Input placeholder="Jane" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -119,22 +103,113 @@ export function NewUserForm({
                       <FormItem>
                         <FormLabel>Last Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Knowles-Carter" {...field} />
+                          <Input placeholder="Doe" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isPending}>
-                  {isPending ? "Creating user..." : "Create User"}
-                </Button>
+
+                {/* Account Information Section */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="jane.doe@example.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            {...field}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-0 top-0 h-full px-3"
+                            onClick={togglePasswordVisibility}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                            <span className="sr-only">
+                              {showPassword ? "Hide password" : "Show password"}
+                            </span>
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
+
+              {/* Error display */}
+              {error && (
+                <Alert variant="destructive">
+                  <AlertTitle>Registration failed</AlertTitle>
+                  <AlertDescription>
+                    {error.message ||
+                      "Please check your information and try again."}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Success message */}
+              {isSuccess && data && (
+                <Alert className="border-green-200 bg-green-50 text-green-800">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertTitle>Success!</AlertTitle>
+                  <AlertDescription>
+                    Your account has been created successfully.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
+              </Button>
             </form>
           </Form>
-          {data && <div>Message: {JSON.stringify(data)}</div>}
-          {error && <div>Error: {JSON.stringify(error.fieldErrors)}</div>}
         </CardContent>
+        <CardFooter className="flex justify-center border-t p-4">
+          <p className="text-muted-foreground text-sm">
+            Already have an account?{" "}
+            <a href="/login" className="text-primary hover:underline">
+              Sign in
+            </a>
+          </p>
+        </CardFooter>
       </Card>
     </div>
   );
