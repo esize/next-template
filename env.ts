@@ -15,17 +15,6 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
   },
-  // Called when the schema validation fails.
-  onValidationError: (error) => {
-    console.error("❌ Invalid environment variables:", error);
-    throw new Error("Invalid environment variables");
-  },
-  // Called when server variables are accessed on the client.
-  onInvalidAccess: () => {
-    throw new Error(
-      "❌ Attempted to access a server-side environment variable on the client",
-    );
-  },
 
   emptyStringAsUndefined: true,
 });
