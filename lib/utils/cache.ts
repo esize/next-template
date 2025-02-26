@@ -7,7 +7,7 @@ type CacheEntry<T> = {
 };
 
 class Cache {
-  private cache: Map<string, CacheEntry<any>> = new Map();
+  private cache: Map<string, CacheEntry<unknown>> = new Map();
 
   /**
    * Get a value from the cache
