@@ -4,6 +4,6 @@
   - [x] VSCode `settings.json`
   - [x] tsconfig setup
   - [x] eslint setup
-  - [ ] prettier setup
+  - [x] prettier setup
   - [ ] t3-env setup
   - [ ] Drizzle ORM config
