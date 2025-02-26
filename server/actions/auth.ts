@@ -10,7 +10,6 @@ export const logIn = createServerAction()
   .handler(async ({ input }) => {
     console.log(input);
     console.log(await logInUser(input.email, input.password));
-    return null;
   });
 
 export const create = createServerAction()

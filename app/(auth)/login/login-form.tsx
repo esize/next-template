@@ -1,5 +1,6 @@
 "use client";
 
+import { redirect } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
 
@@ -31,10 +32,11 @@ import { cn } from "@/lib/utils";
 import { logInSchema } from "@/lib/validation/auth";
 import { logIn } from "@/server/actions/auth";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+interface LoginFormProps extends React.ComponentPropsWithoutRef<"div"> {
+  returnTo?: string;
+}
+
+export function LoginForm({ className, returnTo, ...props }: LoginFormProps) {
   const { isPending, execute, data, error } = useServerAction(logIn);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -52,6 +54,9 @@ export function LoginForm({
       return;
     }
     form.reset({});
+
+    const returnUrl = returnTo ?? "/";
+    redirect(returnUrl);
   }
 
   const togglePasswordVisibility = () => {
@@ -86,7 +91,6 @@ export function LoginForm({
                         placeholder="m@example.com"
                         className="h-10"
                         {...field}
-                        required
                         autoComplete="email"
                       />
                     </FormControl>
@@ -110,7 +114,6 @@ export function LoginForm({
                           type={showPassword ? "text" : "password"}
                           className="h-10 pr-10"
                           {...field}
-                          required
                           autoComplete="current-password"
                         />
                         <Button

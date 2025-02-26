@@ -1,3 +1,5 @@
+"use server";
+
 // lib/auth/session.ts
 import { cookies } from "next/headers";
 
@@ -96,7 +98,7 @@ export async function createSession(
  * }
  * ```
  */
-export async function getCurrentSession(): Promise<
+export async function getSession(): Promise<
   (Session & { user: SessionUser }) | null
 > {
   const sessionId = await getSessionCookie();
@@ -133,7 +135,7 @@ export async function getCurrentSession(): Promise<
 
   // Check if session is expired
   if (new Date() > session.expiresAt) {
-    await invalidateSession(sessionId);
+    await invalidateSession();
 
     return null;
   }
@@ -160,7 +162,9 @@ export async function getCurrentSession(): Promise<
  * await invalidateSession(sessionId);
  * ```
  */
-export async function invalidateSession(sessionId: string): Promise<void> {
+export async function invalidateSession(): Promise<void> {
+  const sessionId = await getSessionCookie();
+  if (!sessionId) return;
   await db.delete(sessions).where(eq(sessions.id, sessionId));
 
   // If this is the current session, remove the cookie
@@ -187,7 +191,7 @@ export async function invalidateAllUserSessions(userId: string): Promise<void> {
   await db.delete(sessions).where(eq(sessions.userId, userId));
 
   // If the current session belongs to this user, remove the cookie
-  const currentSession = await getCurrentSession();
+  const currentSession = await getSession();
   if (currentSession && currentSession.userId === userId) {
     removeSessionCookie();
   }
