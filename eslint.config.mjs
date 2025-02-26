@@ -30,8 +30,8 @@ const eslintConfig = [
       "react/no-unescaped-entities": "off",
       "prefer-arrow-callback": ["error"],
       "prefer-template": ["error"],
-      semi: ["error"],
-      quotes: ["error", "double"],
+      semi: ["warn"],
+      quotes: ["warn", "double"],
       "n/no-process-env": ["error"],
       "check-file/filename-naming-convention": [
         "error",
