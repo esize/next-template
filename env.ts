@@ -1,6 +1,9 @@
 /* eslint-disable n/no-process-env */
 import { createEnv } from "@t3-oss/env-nextjs";
+import * as dotenv from "dotenv";
 import { z } from "zod";
+
+dotenv.config();
 
 export const env = createEnv({
   server: {
